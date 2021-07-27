@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frame Rate</title>
+
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <style>
+        .current-fps {
+            font-size: 30vw;
+        }
+    </style>
+</head>
+<body
+    x-data="{ fps: 30, current: 1 }"
+    @set-current.window="current = $event.detail"
+    x-init="onFpsChange(fps, 0, $dispatch); $watch('fps', (fps, oldFps) => onFpsChange(fps, oldFps, $dispatch))"
+    class="bg-black text-gray-500 p-4 md:p-16 flex items-center flex-col w-screen h-screen"
+>
+    <div class="flex">
+        <div class="relative">
+            <select class="text-md md:text-xl relative w-full appearance-none bg-transparent border border-gray-700 text-gray-600 rounded-md shadow-sm pl-3 pr-10 py-2 text-left cursor-default focus:outline-none focus:ring-1 focus:ring-indigo-500 focus:border-indigo-500" x-model="fps" @change="fps = parseFloat($event.target.value)">
+                <option value="12">12 fps</option>
+                <option value="18">18 fps</option>
+                <option value="23.976">23.98 fps</option>
+                <option value="24">24 fps</option>
+                <option value="25">25 fps</option>
+                <option value="29.97">29.97 fps</option>
+                <option value="30">30 fps</option>
+                <option value="59.94">59.94 fps</option>
+                <option value="60">60 fps</option>
+            </select>
+            <span class="ml-3 absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <svg class="h-5 w-5 text-gray-700" x-description="Heroicon name: solid/selector" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path fill-rule="evenodd" d="M10 3a1 1 0 01.707.293l3 3a1 1 0 01-1.414 1.414L10 5.414 7.707 7.707a1 1 0 01-1.414-1.414l3-3A1 1 0 0110 3zm-3.707 9.293a1 1 0 011.414 0L10 14.586l2.293-2.293a1 1 0 011.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+            </span>
+        </div>
+    </div>
+
+    <div class="flex flex-1 flex-col items-center justify-center text-white font-bold text-center my-4">
+        <div class="current-fps leading-none" x-text="current"></div>
+    </div>
+
+    <div class="w-full bg-black h-6 md:h-12">
+        <div class="bg-white h-6 md:h-12" :style="`width: ${current * 100 / fps}%`"></div>
+    </div>
+
+    <script>
+        let timeout;
+
+        function onFpsChange(fps, oldFps, $dispatch) {
+            if (fps == oldFps) {
+                return;
+            }
+
+            clearInterval(timeout);
+            let current = 0;
+
+            $dispatch('set-current', current);
+            timeout = setInterval(() => {
+                current++;
+                $dispatch('set-current', current);
+
+                if (current === Math.floor(fps)) {
+                    current = -1;
+                }
+            }, 1000 / fps);
+        }
+    </script>
+</body>
+</html>
